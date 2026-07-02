@@ -15,6 +15,7 @@ class User(Base):
     role = Column(String, default="user")
     categories = relationship("Category", back_populates="owner")
     transactions = relationship("Transaction", back_populates="owner")
+    budgets = relationship("Budget", back_populates="owner")
 
 class Category(Base):
     __tablename__ = "categories"
@@ -25,6 +26,7 @@ class Category(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="categories")
     transactions = relationship("Transaction", back_populates="category")
+    budgets = relationship("Budget", back_populates="category")
 
 
 class Transaction(Base):
@@ -39,3 +41,15 @@ class Transaction(Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     owner = relationship("User", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
+
+class Budget(Base):
+    __tablename__ = "budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Float, nullable=False)
+    month = Column(Integer, nullable=False)
+    year = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    owner = relationship("User", back_populates="budgets")
+    category = relationship("Category", back_populates="budgets")
