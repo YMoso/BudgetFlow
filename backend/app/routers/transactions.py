@@ -8,6 +8,7 @@ from starlette import status
 from backend.app.database import get_db
 from backend.app.models import Category, Transaction
 from backend.app.routers.auth import get_current_user
+from sqlalchemy import func
 
 router = APIRouter(
     prefix="/transactions",
@@ -59,6 +60,19 @@ class TransactionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class MonthlySummaryResponse(BaseModel):
+    year: int
+    month: int
+    total_income: float
+    total_expense: float
+    balance: float
+
+class CategorySummaryResponse(BaseModel):
+    category_id: int
+    category_name: str
+    type: str
+    total: float
+
 def get_user_category(db: Session, category_id: int, user_id: int):
     category = db.query(Category).filter(Category.id == category_id, Category.user_id == user_id).first()
     if category is None:
@@ -98,6 +112,38 @@ async def read_transactions(current_user: user_dependency, db: db_dependency, tr
         query = query.filter(Transaction.category_id == category_id)
 
     return query.all()
+
+@router.get("/summary/monthly", response_model=MonthlySummaryResponse)
+async def monthly_summary(current_user: user_dependency, db: db_dependency, year: int = Query(gt=2000),
+                          month: int = Query(ge=1, le=12)):
+    user_id = current_user.get("id")
+    total_income = db.query(func.sum(Transaction.amount)).filter(Transaction.user_id == user_id,
+        Transaction.type == "income",
+        func.strftime("%Y", Transaction.transaction_date) == str(year),
+        func.strftime("%m", Transaction.transaction_date) == f"{month:02d}").scalar() or 0
+
+    total_expense = db.query(func.sum(Transaction.amount)).filter(Transaction.user_id == user_id,
+        Transaction.type == "expense",
+        func.strftime("%Y", Transaction.transaction_date) == str(year),
+        func.strftime("%m", Transaction.transaction_date) == f"{month:02d}").scalar() or 0
+    return {"year": year, "month": month, "total_income": total_income, "total_expense": total_expense,
+            "balance": total_income - total_expense}
+
+@router.get("/summary/by-category", response_model=list[CategorySummaryResponse])
+async def summary_by_category(current_user: user_dependency, db: db_dependency, year: int = Query(gt=2000),
+                              month: int = Query(ge=1, le=12)):
+    user_id = current_user.get("id")
+    results = db.query(
+        Category.id.label("category_id"),
+        Category.name.label("category_name"),
+        Transaction.type.label("type"),
+        func.sum(Transaction.amount).label("total")).join(Category, Transaction.category_id == Category.id).filter(
+        Transaction.user_id == user_id,
+        func.strftime("%Y", Transaction.transaction_date) == str(year),
+        func.strftime("%m", Transaction.transaction_date) == f"{month:02d}",
+    ).group_by(Category.id, Category.name, Transaction.type).all()
+
+    return results
 
 @router.get("/{transaction_id}", response_model=TransactionResponse, status_code=status.HTTP_200_OK)
 async def read_transaction(current_user: user_dependency, db: db_dependency, transaction_id: int = Path(gt=0)):
