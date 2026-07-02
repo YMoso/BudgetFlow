@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 from backend.app.database import Base
 
 class User(Base):
@@ -12,7 +13,8 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     role = Column(String, default="user")
-
+    categories = relationship("Category", back_populates="owner")
+    transactions = relationship("Transaction", back_populates="owner")
 
 class Category(Base):
     __tablename__ = "categories"
@@ -21,7 +23,19 @@ class Category(Base):
     name = Column(String, nullable=False)
     type = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner = relationship("User", back_populates="categories")
+    transactions = relationship("Transaction", back_populates="category")
 
 
+class Transaction(Base):
+    __tablename__ = "transactions"
 
-
+    id = Column(Integer, primary_key=True, index=True)
+    amount = Column(Float, nullable=False)
+    description = Column(String, nullable=True)
+    type = Column(String, nullable=False)
+    transaction_date = Column(Date, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
+    owner = relationship("User", back_populates="transactions")
+    category = relationship("Category", back_populates="transactions")
