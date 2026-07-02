@@ -6,6 +6,7 @@ from backend.app.database import get_db
 from backend.app.routers.auth import get_current_admin, UserResponse
 from backend.app.models import User, Category
 from pydantic import BaseModel
+
 router = APIRouter(
     prefix="/admin",
     tags=["admin"],
