@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 from starlette import status
 from backend.app.database import get_db
@@ -37,6 +37,17 @@ class UserCreate(BaseModel):
     email: str = Field(min_length=5, max_length=100)
     password: str = Field(min_length=6, max_length=100)
     role: str = Field(default="user")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "name": "John",
+                "surname": "Paul",
+                "username": "dziab",
+                "email": "john_paul@example.com",
+                "password": "test123",
+            }
+        }
+    )
 
 
 class UserResponse(BaseModel):

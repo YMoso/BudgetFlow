@@ -1,13 +1,12 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 from starlette import status
 from backend.app.database import get_db
 from backend.app.models import Category
 from backend.app.routers.auth import get_current_user
 from enum import Enum
-
 
 router = APIRouter(
     prefix="/categories",
@@ -24,6 +23,14 @@ class CategoryType(str, Enum):
 class CategoryCreate(BaseModel):
     name: str = Field(min_length=2, max_length=50)
     type: CategoryType
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "name": "Food",
+                "type": "expense",
+            }
+        }
+    )
 
 
 class CategoryUpdate(BaseModel):
