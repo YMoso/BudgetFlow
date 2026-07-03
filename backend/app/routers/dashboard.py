@@ -2,7 +2,7 @@ from datetime import date
 from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy import func
+from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 from starlette import status
 from backend.app.database import get_db
@@ -48,14 +48,16 @@ async def monthly_dashboard(current_user: user_dependency, db: db_dependency, ye
     user_id = current_user.get("id")
     total_income = db.query(func.sum(Transaction.amount)).filter(Transaction.user_id == user_id,
                                                                  Transaction.type == "income",
-                                                                 func.strftime("%Y", Transaction.transaction_date) == str(year),
-                                                                 func.strftime("%m", Transaction.transaction_date) == f"{month:02d}",
+                                                                 extract("year", Transaction.transaction_date) == year,
+                                                                 extract("month",
+                                                                         Transaction.transaction_date) == month
                                                                  ).scalar() or 0
 
     total_expense = db.query(func.sum(Transaction.amount)).filter(Transaction.user_id == user_id,
                                                                   Transaction.type == "expense",
-                                                                  func.strftime("%Y", Transaction.transaction_date) == str(year),
-                                                                  func.strftime("%m", Transaction.transaction_date) == f"{month:02d}",
+                                                                  extract("year", Transaction.transaction_date) == year,
+                                                                  extract("month",
+                                                                          Transaction.transaction_date) == month
                                                                   ).scalar() or 0
     budget_total = db.query(func.sum(Budget.amount)).filter(
         Budget.user_id == user_id,
@@ -67,8 +69,8 @@ async def monthly_dashboard(current_user: user_dependency, db: db_dependency, ye
                                       func.sum(Transaction.amount).label("total")).join(Category,
     Transaction.category_id == Category.id).filter(Transaction.user_id == user_id,
                                                    Transaction.type == "expense",
-                                                   func.strftime("%Y", Transaction.transaction_date) == str(year),
-                                                   func.strftime("%m", Transaction.transaction_date) == f"{month:02d}"
+                                                   extract("year", Transaction.transaction_date) == year,
+                                                   extract("month", Transaction.transaction_date) == month
                                                    ).group_by(Category.id,Category.name).order_by(
         func.sum(Transaction.amount).desc()).limit(5).all()
 
@@ -81,8 +83,8 @@ async def monthly_dashboard(current_user: user_dependency, db: db_dependency, ye
         Category.id.label("category_id"),
         Category.name.label("category_name")).join(Category, Transaction.category_id == Category.id).filter(
         Transaction.user_id == user_id,
-        func.strftime("%Y", Transaction.transaction_date) == str(year),
-        func.strftime("%m", Transaction.transaction_date) == f"{month:02d}").order_by(
+        extract("year", Transaction.transaction_date) == year,
+        extract("month", Transaction.transaction_date) == month).order_by(
         Transaction.transaction_date.desc(),Transaction.id.desc()).limit(5).all()
     return {
         "year": year,

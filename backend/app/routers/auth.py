@@ -34,8 +34,8 @@ class UserCreate(BaseModel):
     name: str = Field(min_length=2, max_length=50)
     surname: str = Field(min_length=2, max_length=50)
     username: str = Field(min_length=3, max_length=30)
-    email: str = Field(min_length=5, max_length=100)
-    password: str = Field(min_length=6, max_length=100)
+    email: str = Field(min_length=5, max_length=72)
+    password: str = Field(min_length=6, max_length=72)
     role: str = Field(default="user")
     model_config = ConfigDict(
         json_schema_extra={

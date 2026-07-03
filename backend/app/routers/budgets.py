@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import func
+from sqlalchemy import extract, func
 from sqlalchemy.orm import Session
 from starlette import status
 from backend.app.database import get_db
@@ -104,8 +104,8 @@ async def monthly_budget_summary(current_user: user_dependency, db: db_dependenc
             Transaction.user_id == user_id,
             Transaction.category_id == budget.category_id,
             Transaction.type == "expense",
-            func.strftime("%Y", Transaction.transaction_date) == str(year),
-            func.strftime("%m", Transaction.transaction_date) == f"{month:02d}").scalar() or 0
+            extract("year", Transaction.transaction_date) == year,
+            extract("month", Transaction.transaction_date) == month).scalar() or 0
 
         remaining = budget.amount -spent_amount
         summary.append({
