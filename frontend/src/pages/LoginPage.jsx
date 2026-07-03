@@ -35,27 +35,40 @@ export default function LoginPage() {
   }
 
   return (
-    <div>
-      <h1>Login</h1>
+    <main className="page">
+      <div className="page-header">
+        <h1>Welcome back</h1>
+        <p>Login to manage your BudgetFlow dashboard.</p>
+      </div>
 
-      {error && <p>{error}</p>}
+      <div className="card">
+        {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(event) => setUsername(event.target.value)}
-        />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <label>Username</label>
+            <input
+              placeholder="johnpaul"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+            />
+          </div>
 
-        <input
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-        />
+          <div className="form-row">
+            <label>Password</label>
+            <input
+              placeholder="Your password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
-    </div>
+          <button className="btn" type="submit">
+            Login
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }

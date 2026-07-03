@@ -11,7 +11,7 @@ export default function RegisterPage() {
     username: "",
     email: "",
     password: "",
-    role: "user", // temporary because your backend still accepts role
+    role: "user",
   });
 
   const [error, setError] = useState("");
@@ -36,51 +36,75 @@ export default function RegisterPage() {
   }
 
   return (
-    <div>
-      <h1>Register</h1>
+    <main className="page">
+      <div className="page-header">
+        <h1>Create your account</h1>
+        <p>Start tracking your income, expenses, budgets, and categories.</p>
+      </div>
 
-      {error && <p>{error}</p>}
+      <div className="card">
+        {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Name</label>
+              <input
+                name="name"
+                placeholder="John"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
 
-        <input
-          name="surname"
-          placeholder="Surname"
-          value={formData.surname}
-          onChange={handleChange}
-        />
+            <div className="form-row">
+              <label>Surname</label>
+              <input
+                name="surname"
+                placeholder="Paul"
+                value={formData.surname}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
-        <input
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-        />
+          <div className="form-row">
+            <label>Username</label>
+            <input
+              name="username"
+              placeholder="johnpaul"
+              value={formData.username}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          name="email"
-          placeholder="Email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
+          <div className="form-row">
+            <label>Email</label>
+            <input
+              name="email"
+              placeholder="john@example.com"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          name="password"
-          placeholder="Password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
+          <div className="form-row">
+            <label>Password</label>
+            <input
+              name="password"
+              placeholder="Your password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
 
-        <button type="submit">Create account</button>
-      </form>
-    </div>
+          <button className="btn" type="submit">
+            Create account
+          </button>
+        </form>
+      </div>
+    </main>
   );
 }
