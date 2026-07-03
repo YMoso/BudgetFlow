@@ -11,6 +11,7 @@ export default function BudgetsPage() {
     year: "2026",
     category_id: "",
   });
+  const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [error, setError] = useState("");
 
   async function fetchBudgets() {
@@ -54,28 +55,49 @@ export default function BudgetsPage() {
     });
   }
 
+  function resetForm() {
+    setFormData({
+      amount: "",
+      month: "7",
+      year: "2026",
+      category_id: "",
+    });
+    setEditingBudgetId(null);
+  }
+
+  function startEditing(budget) {
+    setEditingBudgetId(budget.id);
+    setFormData({
+      amount: String(budget.amount),
+      month: String(budget.month),
+      year: String(budget.year),
+      category_id: String(budget.category_id),
+    });
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
+    const payload = {
+      amount: Number(formData.amount),
+      month: Number(formData.month),
+      year: Number(formData.year),
+      category_id: Number(formData.category_id),
+    };
+
     try {
-      await api.post("/budgets/", {
-        amount: Number(formData.amount),
-        month: Number(formData.month),
-        year: Number(formData.year),
-        category_id: Number(formData.category_id),
-      });
+      if (editingBudgetId) {
+        await api.put(`/budgets/${editingBudgetId}`, payload);
+      } else {
+        await api.post("/budgets/", payload);
+      }
 
-      setFormData({
-        ...formData,
-        amount: "",
-        category_id: "",
-      });
-
+      resetForm();
       fetchBudgets();
       fetchSummary();
     } catch (error) {
-      setError(error.response?.data?.detail || "Could not create budget");
+      setError(error.response?.data?.detail || "Could not save budget");
     }
   }
 
@@ -89,93 +111,189 @@ export default function BudgetsPage() {
     }
   }
 
+  function getCategoryName(categoryId) {
+    const category = categories.find((category) => category.id === categoryId);
+    return category ? category.name : `Category ${categoryId}`;
+  }
+
   const expenseCategories = categories.filter(
     (category) => category.type === "expense"
   );
 
   return (
-    <div>
-      <h1>Budgets</h1>
+    <main className="page">
+      <div className="page-header">
+        <h1>Budgets</h1>
+        <p>Set and edit monthly budgets for your expense categories.</p>
+      </div>
 
-      {error && <p>{error}</p>}
+      <div className="card">
+        {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="amount"
-          placeholder="Budget amount"
-          type="number"
-          step="0.01"
-          value={formData.amount}
-          onChange={handleChange}
-        />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Amount</label>
+              <input
+                name="amount"
+                placeholder="500"
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={handleChange}
+              />
+            </div>
 
-        <input
-          name="month"
-          placeholder="Month"
-          type="number"
-          min="1"
-          max="12"
-          value={formData.month}
-          onChange={handleChange}
-        />
+            <div className="form-row">
+              <label>Category</label>
+              <select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+              >
+                <option value="">Select expense category</option>
+                {expenseCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        <input
-          name="year"
-          placeholder="Year"
-          type="number"
-          value={formData.year}
-          onChange={handleChange}
-        />
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Month</label>
+              <input
+                name="month"
+                type="number"
+                min="1"
+                max="12"
+                value={formData.month}
+                onChange={handleChange}
+              />
+            </div>
 
-        <select
-          name="category_id"
-          value={formData.category_id}
-          onChange={handleChange}
-        >
-          <option value="">Select expense category</option>
-          {expenseCategories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+            <div className="form-row">
+              <label>Year</label>
+              <input
+                name="year"
+                type="number"
+                value={formData.year}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
-        <button type="submit">Add budget</button>
-      </form>
+          <div className="actions">
+            <button className="btn" type="submit">
+              {editingBudgetId ? "Update budget" : "Add budget"}
+            </button>
 
-      <button onClick={fetchSummary}>Load monthly summary</button>
+            {editingBudgetId && (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={resetForm}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
 
-      <h2>Your budgets</h2>
+      <div className="card">
+        <button className="btn" onClick={fetchSummary}>
+          Load monthly summary
+        </button>
+      </div>
 
-      {budgets.length === 0 ? (
-        <p>No budgets yet.</p>
-      ) : (
-        <ul>
-          {budgets.map((budget) => (
-            <li key={budget.id}>
-              {budget.month}/{budget.year} — {budget.amount} — category ID:{" "}
-              {budget.category_id}{" "}
-              <button onClick={() => deleteBudget(budget.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="card">
+        <h2>Your budgets</h2>
 
-      <h2>Budget summary</h2>
+        {budgets.length === 0 ? (
+          <p className="empty-message">No budgets yet.</p>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Year</th>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-      {summary.length === 0 ? (
-        <p>No summary loaded.</p>
-      ) : (
-        <ul>
-          {summary.map((item) => (
-            <li key={item.category_id}>
-              {item.category_name}: budget {item.budget_amount}, spent{" "}
-              {item.spent_amount}, remaining {item.remaining},{" "}
-              {item.is_over_budget ? "over budget" : "within budget"}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              <tbody>
+                {budgets.map((budget) => (
+                  <tr key={budget.id}>
+                    <td>{budget.month}</td>
+                    <td>{budget.year}</td>
+                    <td>{budget.amount}</td>
+                    <td>{getCategoryName(budget.category_id)}</td>
+                    <td>
+                      <div className="actions">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => startEditing(budget)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => deleteBudget(budget.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Budget summary</h2>
+
+        {summary.length === 0 ? (
+          <p className="empty-message">No summary loaded.</p>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Budget</th>
+                  <th>Spent</th>
+                  <th>Remaining</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {summary.map((item) => (
+                  <tr key={item.category_id}>
+                    <td>{item.category_name}</td>
+                    <td>{item.budget_amount}</td>
+                    <td>{item.spent_amount}</td>
+                    <td>{item.remaining}</td>
+                    <td>
+                      {item.is_over_budget ? "Over budget" : "Within budget"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

@@ -11,6 +11,7 @@ export default function TransactionsPage() {
     transaction_date: "",
     category_id: "",
   });
+  const [editingTransactionId, setEditingTransactionId] = useState(null);
   const [error, setError] = useState("");
 
   async function fetchTransactions() {
@@ -37,9 +38,43 @@ export default function TransactionsPage() {
   }, []);
 
   function handleChange(event) {
+    const { name, value } = event.target;
+
+    setFormData((previousFormData) => {
+      if (name === "type") {
+        return {
+          ...previousFormData,
+          type: value,
+          category_id: "",
+        };
+      }
+
+      return {
+        ...previousFormData,
+        [name]: value,
+      };
+    });
+  }
+
+  function resetForm() {
     setFormData({
-      ...formData,
-      [event.target.name]: event.target.value,
+      amount: "",
+      description: "",
+      type: "expense",
+      transaction_date: "",
+      category_id: "",
+    });
+    setEditingTransactionId(null);
+  }
+
+  function startEditing(transaction) {
+    setEditingTransactionId(transaction.id);
+    setFormData({
+      amount: String(transaction.amount),
+      description: transaction.description || "",
+      type: transaction.type,
+      transaction_date: transaction.transaction_date,
+      category_id: String(transaction.category_id),
     });
   }
 
@@ -47,26 +82,25 @@ export default function TransactionsPage() {
     event.preventDefault();
     setError("");
 
+    const payload = {
+      amount: Number(formData.amount),
+      description: formData.description,
+      type: formData.type,
+      transaction_date: formData.transaction_date,
+      category_id: Number(formData.category_id),
+    };
+
     try {
-      await api.post("/transactions/", {
-        amount: Number(formData.amount),
-        description: formData.description,
-        type: formData.type,
-        transaction_date: formData.transaction_date,
-        category_id: Number(formData.category_id),
-      });
+      if (editingTransactionId) {
+        await api.put(`/transactions/${editingTransactionId}`, payload);
+      } else {
+        await api.post("/transactions/", payload);
+      }
 
-      setFormData({
-        amount: "",
-        description: "",
-        type: "expense",
-        transaction_date: "",
-        category_id: "",
-      });
-
+      resetForm();
       fetchTransactions();
     } catch (error) {
-      setError(error.response?.data?.detail || "Could not create transaction");
+      setError(error.response?.data?.detail || "Could not save transaction");
     }
   }
 
@@ -79,78 +113,157 @@ export default function TransactionsPage() {
     }
   }
 
+  function getCategoryName(categoryId) {
+    const category = categories.find((category) => category.id === categoryId);
+    return category ? category.name : `Category ${categoryId}`;
+  }
+
   const filteredCategories = categories.filter(
     (category) => category.type === formData.type
   );
 
   return (
-    <div>
-      <h1>Transactions</h1>
+    <main className="page">
+      <div className="page-header">
+        <h1>Transactions</h1>
+        <p>Add and manage income and expense transactions.</p>
+      </div>
 
-      {error && <p>{error}</p>}
+      <div className="card">
+        {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="amount"
-          placeholder="Amount"
-          type="number"
-          step="0.01"
-          value={formData.amount}
-          onChange={handleChange}
-        />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Amount</label>
+              <input
+                name="amount"
+                type="number"
+                step="0.01"
+                placeholder="45.50"
+                value={formData.amount}
+                onChange={handleChange}
+              />
+            </div>
 
-        <input
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-        />
+            <div className="form-row">
+              <label>Date</label>
+              <input
+                name="transaction_date"
+                type="date"
+                value={formData.transaction_date}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
-        <select name="type" value={formData.type} onChange={handleChange}>
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
+          <div className="form-row">
+            <label>Description</label>
+            <input
+              name="description"
+              placeholder="Grocery shopping"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </div>
 
-        <input
-          name="transaction_date"
-          type="date"
-          value={formData.transaction_date}
-          onChange={handleChange}
-        />
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Type</label>
+              <select name="type" value={formData.type} onChange={handleChange}>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </div>
 
-        <select
-          name="category_id"
-          value={formData.category_id}
-          onChange={handleChange}
-        >
-          <option value="">Select category</option>
-          {filteredCategories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+            <div className="form-row">
+              <label>Category</label>
+              <select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleChange}
+              >
+                <option value="">Select category</option>
+                {filteredCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-        <button type="submit">Add transaction</button>
-      </form>
+          <div className="actions">
+            <button className="btn" type="submit">
+              {editingTransactionId
+                ? "Update transaction"
+                : "Add transaction"}
+            </button>
 
-      <h2>Your transactions</h2>
-
-      {transactions.length === 0 ? (
-        <p>No transactions yet.</p>
-      ) : (
-        <ul>
-          {transactions.map((transaction) => (
-            <li key={transaction.id}>
-              {transaction.transaction_date} — {transaction.description} —{" "}
-              {transaction.amount} — {transaction.type}{" "}
-              <button onClick={() => deleteTransaction(transaction.id)}>
-                Delete
+            {editingTransactionId && (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={resetForm}
+              >
+                Cancel
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="card">
+        <h2>Your transactions</h2>
+
+        {transactions.length === 0 ? (
+          <p className="empty-message">No transactions yet.</p>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Type</th>
+                  <th>Category</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {transactions.map((transaction) => (
+                  <tr key={transaction.id}>
+                    <td>{transaction.transaction_date}</td>
+                    <td>{transaction.description}</td>
+                    <td>{transaction.amount}</td>
+                    <td>{transaction.type}</td>
+                    <td>{getCategoryName(transaction.category_id)}</td>
+                    <td>
+                      <div className="actions">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => startEditing(transaction)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => deleteTransaction(transaction.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

@@ -26,21 +26,27 @@ function Navbar() {
   }
 
   return (
-    <nav>
-      {token ? (
-        <>
-          <Link to="/dashboard">Dashboard</Link>{" "}
-          <Link to="/categories">Categories</Link>{" "}
-          <Link to="/transactions">Transactions</Link>{" "}
-          <Link to="/budgets">Budgets</Link>{" "}
-          <button onClick={logout}>Logout</button>
-        </>
-      ) : (
-        <>
-          <Link to="/register">Register</Link>{" "}
-          <Link to="/login">Login</Link>
-        </>
-      )}
+    <nav className="navbar">
+      <div className="navbar-brand">BudgetFlow</div>
+
+      <div className="navbar-links">
+        {token ? (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/categories">Categories</Link>
+            <Link to="/transactions">Transactions</Link>
+            <Link to="/budgets">Budgets</Link>
+            <button className="btn btn-secondary" onClick={logout}>
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/register">Register</Link>
+            <Link to="/login">Login</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

@@ -7,6 +7,7 @@ export default function CategoriesPage() {
     name: "",
     type: "expense",
   });
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [error, setError] = useState("");
 
   async function fetchCategories() {
@@ -29,19 +30,37 @@ export default function CategoriesPage() {
     });
   }
 
+  function resetForm() {
+    setFormData({
+      name: "",
+      type: "expense",
+    });
+    setEditingCategoryId(null);
+  }
+
+  function startEditing(category) {
+    setEditingCategoryId(category.id);
+    setFormData({
+      name: category.name,
+      type: category.type,
+    });
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
     try {
-      await api.post("/categories/", formData);
-      setFormData({
-        name: "",
-        type: "expense",
-      });
+      if (editingCategoryId) {
+        await api.put(`/categories/${editingCategoryId}`, formData);
+      } else {
+        await api.post("/categories/", formData);
+      }
+
+      resetForm();
       fetchCategories();
     } catch (error) {
-      setError(error.response?.data?.detail || "Could not create category");
+      setError(error.response?.data?.detail || "Could not save category");
     }
   }
 
@@ -55,43 +74,97 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div>
-      <h1>Categories</h1>
+    <main className="page">
+      <div className="page-header">
+        <h1>Categories</h1>
+        <p>Create and manage income and expense categories.</p>
+      </div>
 
-      {error && <p>{error}</p>}
+      <div className="card">
+        {error && <p className="error">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="name"
-          placeholder="Category name"
-          value={formData.name}
-          onChange={handleChange}
-        />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="form-row">
+            <label>Category name</label>
+            <input
+              name="name"
+              placeholder="Food"
+              value={formData.name}
+              onChange={handleChange}
+            />
+          </div>
 
-        <select name="type" value={formData.type} onChange={handleChange}>
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
+          <div className="form-row">
+            <label>Type</label>
+            <select name="type" value={formData.type} onChange={handleChange}>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+          </div>
 
-        <button type="submit">Add category</button>
-      </form>
+          <div className="actions">
+            <button className="btn" type="submit">
+              {editingCategoryId ? "Update category" : "Add category"}
+            </button>
 
-      <h2>Your categories</h2>
-
-      {categories.length === 0 ? (
-        <p>No categories yet.</p>
-      ) : (
-        <ul>
-          {categories.map((category) => (
-            <li key={category.id}>
-              {category.name} — {category.type}{" "}
-              <button onClick={() => deleteCategory(category.id)}>
-                Delete
+            {editingCategoryId && (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={resetForm}
+              >
+                Cancel
               </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="card">
+        <h2>Your categories</h2>
+
+        {categories.length === 0 ? (
+          <p className="empty-message">No categories yet.</p>
+        ) : (
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {categories.map((category) => (
+                  <tr key={category.id}>
+                    <td>{category.name}</td>
+                    <td>{category.type}</td>
+                    <td>
+                      <div className="actions">
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => startEditing(category)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => deleteCategory(category.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
