@@ -121,3 +121,60 @@
     display: none;
   }
 }
+
+@media (max-width: 760px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .auth-page,
+  .auth-page-split {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    overflow-x: hidden;
+  }
+
+  .auth-hero,
+  .auth-hero-wide {
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  .auth-panel,
+  .auth-card,
+  .auth-card-large,
+  .auth-form-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .auth-preview,
+  .register-preview {
+    display: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-intro h1 {
+    font-size: 34px;
+    line-height: 1.1;
+  }
+
+  .auth-lead {
+    font-size: 15px;
+  }
+
+  .auth-benefits {
+    flex-wrap: wrap;
+  }
+}

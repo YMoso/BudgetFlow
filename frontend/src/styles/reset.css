@@ -40,3 +40,8 @@ select {
 button {
   cursor: pointer;
 }
+
+img,
+svg {
+  max-width: 100%;
+}
