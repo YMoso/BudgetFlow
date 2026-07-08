@@ -1,0 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+@import "tokens.css";
+@import "reset.css";
+@import "layout.css";
+@import "components.css";
+@import "dashboard.css";
+@import "budgets.css";
+@import "auth.css";
+@import "responsive.css";
+@import "categories.css";
+@import "transactions.css";
+@import "profile.css";
