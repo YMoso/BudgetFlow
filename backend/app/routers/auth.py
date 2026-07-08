@@ -57,7 +57,7 @@ class UserResponse(BaseModel):
     username: str
     email: str
     is_active: bool
-    role: str
+    role: str = "user"
 
     class Config:
         from_attributes = True
