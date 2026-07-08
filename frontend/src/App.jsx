@@ -2,9 +2,9 @@ import {
   BarChart3,
   Folder,
   LogOut,
-  PieChart,
   Receipt,
   Target,
+  User,
   Wallet,
 } from "lucide-react";
 import { NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import TransactionsPage from "./pages/TransactionsPage";
 import { useAuth } from "./context/AuthContext";
+import ProfilePage from "./pages/ProfilePage";
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -79,6 +80,11 @@ function Sidebar() {
           <Target />
           <span>Budgets</span>
         </NavLink>
+
+          <NavLink className="sidebar-link" to="/profile">
+              <User />
+              <span>Profile</span>
+            </NavLink>
       </nav>
 
       <div className="sidebar-footer">
@@ -153,6 +159,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
         </Routes>
       </main>
     </div>

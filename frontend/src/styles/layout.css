@@ -254,3 +254,32 @@
   opacity: 0.88;
   transform: translateX(2px);
 }
+
+.sidebar-currency {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.sidebar-currency label {
+  color: var(--sidebar-text);
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+  padding-left: 4px;
+}
+
+.sidebar-currency select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--sidebar-text);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.sidebar-currency select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: none;
+}
