@@ -1,0 +1,76 @@
+.budget-progress {
+  display: grid;
+  gap: 12px;
+}
+
+.budget-progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.progress-fill-danger {
+  background: var(--expense);
+}
+
+/* ============ Budget summary cards ============ */
+
+.budget-summary-list {
+  display: grid;
+  gap: 14px;
+}
+
+.budget-summary-item {
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.budget-summary-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+  border-color: #d4dced;
+}
+
+.budget-summary-top,
+.budget-summary-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.budget-summary-top h3 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.budget-summary-top p,
+.budget-summary-bottom {
+  font-size: 13px;
+  color: var(--text-muted);
+}
