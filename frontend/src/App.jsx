@@ -1,102 +1,160 @@
-import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import RegisterPage from "./pages/RegisterPage";
-import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import CategoriesPage from "./pages/CategoriesPage";
-import TransactionsPage from "./pages/TransactionsPage";
+import {
+  BarChart3,
+  Folder,
+  LogOut,
+  PieChart,
+  Receipt,
+  Target,
+  Wallet,
+} from "lucide-react";
+import { NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+
 import BudgetsPage from "./pages/BudgetsPage";
+import CategoriesPage from "./pages/CategoriesPage";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import { useAuth } from "./context/AuthContext";
 
 function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("access_token");
+  const { isAuthenticated } = useAuth();
 
-  if (!token) {
-    return <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   return children;
 }
 
-function Navbar() {
-  const navigate = useNavigate();
-  const token = localStorage.getItem("access_token");
+function PublicRoute({ children }) {
+  const { isAuthenticated } = useAuth();
 
-  function logout() {
-    localStorage.removeItem("access_token");
-    navigate("/login");
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
+
+function Sidebar() {
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  function handleLogout() {
+    logout();
+    navigate("/login", { replace: true });
   }
 
   return (
-    <nav className="navbar">
-      <div className="navbar-brand">BudgetFlow</div>
+    <aside className="sidebar">
+      <button className="sidebar-brand sidebar-brand-button" onClick={handleLogout}>
+          <div className="brand-mark">
+            <Wallet />
+          </div>
+          <span className="brand-name">BudgetFlow</span>
+        </button>
 
-      <div className="navbar-links">
-        {token ? (
-          <>
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/categories">Categories</Link>
-            <Link to="/transactions">Transactions</Link>
-            <Link to="/budgets">Budgets</Link>
-            <button className="btn btn-secondary" onClick={logout}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/register">Register</Link>
-            <Link to="/login">Login</Link>
-          </>
-        )}
+      <nav className="sidebar-nav">
+        <NavLink className="sidebar-link" to="/dashboard">
+          <BarChart3 />
+          <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink className="sidebar-link" to="/categories">
+          <Folder />
+          <span>Categories</span>
+        </NavLink>
+
+        <NavLink className="sidebar-link" to="/transactions">
+          <Receipt />
+          <span>Transactions</span>
+        </NavLink>
+
+        <NavLink className="sidebar-link" to="/budgets">
+          <Target />
+          <span>Budgets</span>
+        </NavLink>
+      </nav>
+
+      <div className="sidebar-footer">
+        <button className="sidebar-logout" onClick={handleLogout}>
+          <LogOut />
+          <span>Logout</span>
+        </button>
       </div>
-    </nav>
+    </aside>
   );
 }
 
 export default function App() {
   return (
-    <>
-      <Navbar />
+    <div className="app-shell">
+      <Sidebar />
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            }
+          />
 
-        <Route
-          path="/categories"
-          element={
-            <ProtectedRoute>
-              <CategoriesPage />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
 
-        <Route
-          path="/transactions"
-          element={
-            <ProtectedRoute>
-              <TransactionsPage />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/budgets"
-          element={
-            <ProtectedRoute>
-              <BudgetsPage />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </>
+          <Route
+            path="/categories"
+            element={
+              <ProtectedRoute>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute>
+                <TransactionsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/budgets"
+            element={
+              <ProtectedRoute>
+                <BudgetsPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+    </div>
   );
 }
