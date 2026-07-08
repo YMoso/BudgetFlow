@@ -100,10 +100,10 @@ const MONTH_NAMES = [
 ];
 
 function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("pl-PL", {
     style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
+    currency: "PLN",
+    maximumFractionDigits: 2,
   }).format(value || 0);
 }
 
@@ -112,6 +112,7 @@ export default function DashboardPage() {
   const [year, setYear] = useState("2026");
   const [month, setMonth] = useState("7");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function fetchDashboard() {
     try {
@@ -188,6 +189,19 @@ export default function DashboardPage() {
     return "You are currently within your monthly budget. Nice work.";
   }
 
+  function showSuccess(message) {
+    setSuccessMessage(message);
+
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+  }
+
+  function clearMessages() {
+    setError("");
+    setSuccessMessage("");
+  }
+
   return (
     <main className="page dashboard-page">
       <section className="dashboard-hero">
@@ -228,6 +242,7 @@ export default function DashboardPage() {
       </section>
 
       {error && <p className="error">{error}</p>}
+      {successMessage && <p className="success">{successMessage}</p>}
 
       {!dashboard ? (
         <p className="empty-message">Loading dashboard...</p>

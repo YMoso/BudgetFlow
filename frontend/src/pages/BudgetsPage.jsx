@@ -10,10 +10,10 @@ function getCurrentYear() {
 }
 
 function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("pl-PL", {
     style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
+    currency: "PLN",
+    maximumFractionDigits: 2,
   }).format(value || 0);
 }
 
@@ -44,6 +44,7 @@ export default function BudgetsPage() {
   });
   const [editingBudgetId, setEditingBudgetId] = useState(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function fetchBudgets() {
     try {
@@ -90,6 +91,19 @@ export default function BudgetsPage() {
     });
   }
 
+  function showSuccess(message) {
+    setSuccessMessage(message);
+
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+  }
+
+  function clearMessages() {
+    setError("");
+    setSuccessMessage("");
+  }
+
   function resetForm() {
     setFormData({
       amount: "",
@@ -99,6 +113,23 @@ export default function BudgetsPage() {
     });
     setEditingBudgetId(null);
   }
+
+  async function deleteCategory(categoryId) {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this category?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await api.delete(`/categories/${categoryId}`);
+    await fetchCategories();
+  } catch (error) {
+    setError(error.response?.data?.detail || "Could not delete category");
+  }
+}
 
   function startEditing(budget) {
     setEditingBudgetId(budget.id);
@@ -136,7 +167,7 @@ export default function BudgetsPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError("");
+    clearMessages();
 
     const validationError = validateForm();
 
@@ -155,8 +186,10 @@ export default function BudgetsPage() {
     try {
       if (editingBudgetId) {
         await api.put(`/budgets/${editingBudgetId}`, payload);
+        showSuccess("Budget updated successfully.");
       } else {
         await api.post("/budgets/", payload);
+        showSuccess("Budget created successfully.");
       }
 
       resetForm();
@@ -167,11 +200,22 @@ export default function BudgetsPage() {
     }
   }
 
-  async function deleteBudget(budgetId) {
+ async function deleteBudget(budgetId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this budget?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    clearMessages();
+
     try {
       await api.delete(`/budgets/${budgetId}`);
       await fetchBudgets();
       await fetchSummary();
+      showSuccess("Budget deleted successfully.");
     } catch (error) {
       setError(error.response?.data?.detail || "Could not delete budget");
     }
@@ -285,6 +329,7 @@ export default function BudgetsPage() {
           </div>
 
           {error && <p className="error">{error}</p>}
+          {successMessage && <p className="success">{successMessage}</p>}
 
           <form className="form" onSubmit={handleSubmit}>
             <div className="form-row">

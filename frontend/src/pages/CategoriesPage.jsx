@@ -9,6 +9,7 @@ export default function CategoriesPage() {
   });
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   async function fetchCategories() {
     try {
@@ -46,9 +47,22 @@ export default function CategoriesPage() {
     });
   }
 
+  function showSuccess(message) {
+    setSuccessMessage(message);
+
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
+  }
+
+  function clearMessages() {
+    setError("");
+    setSuccessMessage("");
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    setError("");
+    clearMessages();
 
     if (!formData.name.trim()) {
       setError("Please enter a category name.");
@@ -58,8 +72,10 @@ export default function CategoriesPage() {
     try {
       if (editingCategoryId) {
         await api.put(`/categories/${editingCategoryId}`, formData);
+        showSuccess("Category updated successfully.");
       } else {
         await api.post("/categories/", formData);
+        showSuccess("Category created successfully.");
       }
 
       resetForm();
@@ -70,9 +86,20 @@ export default function CategoriesPage() {
   }
 
   async function deleteCategory(categoryId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this category?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    clearMessages();
+
     try {
       await api.delete(`/categories/${categoryId}`);
       await fetchCategories();
+      showSuccess("Category deleted successfully.");
     } catch (error) {
       setError(error.response?.data?.detail || "Could not delete category");
     }

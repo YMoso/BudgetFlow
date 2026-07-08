@@ -209,3 +209,13 @@ select:focus {
   background: var(--expense-soft);
   color: var(--expense);
 }
+
+.success {
+  color: #087443;
+  background: var(--income-soft);
+  border: 1px solid #b8f0d0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
