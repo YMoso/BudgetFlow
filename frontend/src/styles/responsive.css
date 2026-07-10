@@ -178,3 +178,212 @@
     flex-wrap: wrap;
   }
 }
+
+/* ============ Strong mobile layout fix ============ */
+
+@media (max-width: 760px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .app-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    overflow-x: hidden;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 100%;
+    padding: 22px 16px 42px;
+    overflow-x: hidden;
+  }
+
+  /* Mobile sidebar */
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
+    position: static;
+    height: auto;
+    padding: 12px;
+    gap: 10px;
+    overflow-x: auto;
+  }
+
+  .sidebar-brand {
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    flex: 1;
+  }
+
+  .sidebar-link {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .sidebar-link span {
+    display: none;
+  }
+
+  .sidebar-footer {
+    flex-shrink: 0;
+    margin-left: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+
+  .sidebar-logout {
+    width: 48px;
+    height: 48px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .sidebar-logout span {
+    display: none;
+  }
+
+  /* Auth pages */
+  .auth-page,
+  .auth-page-split {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
+    padding: 20px 16px 42px;
+    overflow-x: hidden;
+  }
+
+  .auth-hero,
+  .auth-hero-wide {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    padding: 0;
+  }
+
+  .auth-panel,
+  .auth-card,
+  .auth-card-large,
+  .auth-form-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .auth-preview,
+  .auth-preview-pro,
+  .register-preview {
+    display: none;
+  }
+
+  .auth-intro {
+    text-align: center;
+  }
+
+  .auth-intro h1 {
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+
+  .auth-lead {
+    font-size: 15px;
+  }
+
+  .auth-feature-list {
+    display: none;
+  }
+
+  .auth-benefits {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Dashboard */
+  .dashboard-hero,
+  .dashboard-insight-card,
+  .dashboard-main-grid,
+  .dashboard-bottom-grid,
+  .dashboard-pie-layout {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dashboard-hero {
+    text-align: center;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 34px;
+  }
+
+  .dashboard-filter-card {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-filter-card .form-row {
+    width: 100%;
+  }
+
+  .dashboard-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Other feature pages */
+  .categories-hero,
+  .transactions-hero,
+  .budgets-hero,
+  .profile-hero,
+  .categories-layout-grid,
+  .transactions-layout-grid,
+  .budgets-layout-grid,
+  .profile-layout-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .categories-summary-grid,
+  .transactions-summary-grid,
+  .budgets-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .categories-hero h1,
+  .transactions-hero h1,
+  .budgets-hero h1,
+  .profile-hero h1 {
+    font-size: 32px;
+  }
+
+  .category-item-card,
+  .transaction-item-card,
+  .budget-item-card,
+  .profile-detail-item {
+    width: 100%;
+    max-width: 100%;
+  }
+}
